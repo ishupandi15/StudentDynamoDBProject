@@ -1,134 +1,135 @@
 # Student Records CRUD Application using AWS DynamoDB & S3  
-**Author:** Ishwariya pandi 
-
+**Author:** Ishwariya pandi
 **Project:** StudentRecords CRUD Application  
-**Course:** AWS Learner Lab – Project 4  
 
 ---
 
-## 📌 Project Overview  
-This project implements a complete Student Records management system using AWS services.  
-The system performs:
+## ✧ Overview  
+This project implements a complete **Student Records Management System** using AWS services.  
+It includes:
 
-- Creation of a DynamoDB table  
-- Uploading JSON student data  
-- CRUD (Create, Read, Update, Delete) operations  
-- Queries for grade “A” students and gender counts  
-- Export of all DynamoDB data to S3 as a JSON file  
+⋆ Creating a DynamoDB table  
+⋆ Adding JSON student data  
+⋆ CRUD functionality (Create, Read, Update, Delete)  
+⋆ Querying grade “A” students and gender distribution  
+⋆ Exporting processed data to S3  
+⋆ Optional interactive HTML demo  
 
-The project demonstrates the use of AWS Cloud9, DynamoDB, S3, and the boto3 SDK.
-
----
-
-## 🛠 Technologies Used  
-- **AWS Cloud9**  
-- **AWS DynamoDB**  
-- **AWS S3**  
-- **Python 3**  
-- **boto3 (AWS SDK)**  
+This project demonstrates AWS usage through **Cloud9**, **DynamoDB**, **S3**, and the **Python boto3 library**.
 
 ---
 
-## 📌 Part A: Create the DynamoDB Table  
-The file `createTable.py` creates a DynamoDB table named **StudentRecords**.  
-The table uses:
-
-- `student_id` as the Partition Key  
-- Data type: Number  
-
----
-
-## 📌 Part B: Insert Student Data  
-`insertFromFile.py` reads data from `students.json` and inserts each student record into the DynamoDB table.  
-Each record contains:
-
-- Student ID  
-- Name  
-- Gender  
-- Grade  
-- Transportation method  
+## ✧ Technologies Used  
+┊ AWS Cloud9  
+┊ AWS DynamoDB  
+┊ AWS S3  
+┊ Python 3  
+┊ boto3 SDK  
 
 ---
 
-## 📌 Part C: CRUD Operations  
+## ✧ Part A: DynamoDB Table Creation  
+`createTable.py`  
+Creates a DynamoDB table titled **StudentRecords** with:
 
-### View All Students  
-`viewAllStudents.py` retrieves and displays all records stored in the DynamoDB table.
-
-### Update Student Grade  
-`updateStudent.py` updates a student’s grade using their `student_id`.
-
-### Delete a Student  
-`deleteStudent.py` deletes a student record from DynamoDB using their `student_id`.
+➤ Partition key: `student_id`  
+➤ Data type: Number  
 
 ---
 
-## 📌 Part D: Querying Student Data  
-`queryStudents.py` performs two queries:
+## ✧ Part B: Insert Student Data  
+`insertFromFile.py` loads `students.json` into DynamoDB.  
+Each student entry contains:
 
-1. Lists all students who received grade **A**  
-2. Counts how many male and female students are in the dataset  
-
----
-
-## 📤 Export Data to S3  
-The script `uploadToS3.py`:
-
-- Reads all items from DynamoDB  
-- Converts them into JSON format  
-- Uploads the JSON file to an S3 bucket  
-
-This simulates backing up or exporting the processed student data.
+— `student_id`  
+— `student_name`  
+— `gender`  
+— `grade`  
+— `transport`  
 
 ---
 
-## 🧩 students.json  
-This file contains the student dataset used for the project.  
-It includes attributes such as:
+## ✧ Part C: CRUD Operations  
 
-- `student_id`  
-- `student_name`  
-- `gender`  
-- `grade`  
-- `transport`  
+### ◦ View Students  
+`viewAllStudents.py` retrieves and lists all stored student records.
 
----
+### ◦ Update Student  
+`updateStudent.py` changes the grade of a student identified by `student_id`.
 
-## 🔎 Interactive Demo (Optional)  
-An optional interactive HTML file `index.html` is included to simulate:
-
-- Add, edit, delete students  
-- Search, filter by grade  
-- Import and export JSON data  
-
-This is a **browser-only demo** and does **not** connect to AWS.
+### ◦ Delete Student  
+`deleteStudent.py` removes a student record from DynamoDB.
 
 ---
 
-## ✔ Requirements Completed  
-- DynamoDB table created  
-- Data inserted from JSON  
-- CRUD operations implemented  
-- Grade A query completed  
-- Gender count implemented  
-- Data exported to S3  
-- README included  
-- Project structure organized  
-- Optionally includes an interactive HTML demo  
+## ✧ Part D: Query Functions  
+`queryStudents.py` performs two analysis operations:
+
+✦ Displays all students with grade “A” (including A+, A−)  
+✦ Counts male and female students  
 
 ---
 
-## 📁 Project Structure  
+## ✧ Export to S3  
+`uploadToS3.py`:
+
+➤ Reads all student records from DynamoDB  
+➤ Converts them into JSON  
+➤ Uploads the generated file to an S3 bucket  
+
+This simulates data export and backup operations.
+
+---
+
+## ✧ students.json  
+This dataset is included in the project and contains:
+
+⊹ Unique student IDs  
+⊹ Student names  
+⊹ Gender  
+⊹ Grade  
+⊹ Mode of transport  
+
+This file is used for initial data population.
+
+---
+
+## ✧ Interactive Demo (Optional)  
+`index.html` provides a browser-based demonstration supporting:
+
+⋆ Adding students  
+⋆ Editing and deleting records  
+⋆ Searching and filtering  
+⋆ Importing JSON data  
+⋆ Exporting data  
+
+It runs entirely in the browser and does not connect to AWS.
+
+---
+
+## ✧ Requirements Completed  
+✔ DynamoDB table created  
+✔ JSON upload implemented  
+✔ CRUD operations functional  
+✔ Grade A query performed  
+✔ Gender count implemented  
+✔ Data exported to S3  
+✔ README included  
+✔ Optional interactive demo available  
+
+---
+
+## ✧ Project Structure  
 ```text
 YourNameStudentDynamoDBProject/
 │
-├── createTable.py              # Creates DynamoDB table
-├── insertFromFile.py           # Inserts JSON data into DynamoDB
-├── viewAllStudents.py          # Displays all students
-├── updateStudent.py            # Updates student grade
-├── deleteStudent.py            # Deletes a student record
-├── queryStudents.py            # Grade A query + gender count
-├── uploadToS3.py               # Exports DynamoDB data to S3
-├── students.json               # Student dataset
-├── index.html                  # Interactive demo (optional)
-└── README.md                   # Project documentation
+├── createTable.py              ┆ Creates DynamoDB table
+├── insertFromFile.py           ┆ Inserts JSON data into DynamoDB
+├── viewAllStudents.py          ┆ Displays all students
+├── updateStudent.py            ┆ Updates student grade
+├── deleteStudent.py            ┆ Deletes student record
+├── queryStudents.py            ┆ Grade A query + gender count
+├── uploadToS3.py               ┆ Exports DynamoDB data to S3
+├── students.json               ┆ Student dataset
+├── index.html                  ┆ Optional interactive demo
+└── README.md                   ┆ Project documentation
