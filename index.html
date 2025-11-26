@@ -4,269 +4,409 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>StudentRecords CRUD — AWS DynamoDB & S3 Project</title>
-  <meta name="description" content="StudentRecords CRUD (Create, Read, Update, Delete) application using AWS Cloud9, DynamoDB, S3 and Python (boto3). Project submission & demo." />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <meta name="description" content="StudentRecords CRUD (Create, Read, Update, Delete) application using AWS Cloud9, DynamoDB, S3 and Python (boto3). Premium portfolio-style project showcase." />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
   <style>
-    /* ---------- Soft pastel theme & layout ---------- */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{
-      font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      color:#233243;line-height:1.5;overflow-x:hidden;
-      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
-      /* pastel textured background */
-      background: linear-gradient(180deg, #f7fbff 0%, #eef6f9 40%, #f6f9fc 100%);
-      background-attachment: fixed;
+    /* ---------- GLOBAL ---------- */
+    * { margin:0; padding:0; box-sizing:border-box; }
+
+    body {
+      font-family:"Inter", Poppins, system-ui;
+      color:#1d2b3a;
+      background:linear-gradient(180deg,#fefeff 0%,#f6f9fc 100%);
+      background-attachment:fixed;
+      overflow-x:hidden;
     }
 
-    /* subtle paper texture using repeated-radial-gradients (no external image) */
-    body::before{
+    /* Subtle noise texture overlay */
+    body::before {
       content:"";
       position:fixed; inset:0; pointer-events:none;
-      background-image:
-        radial-gradient(rgba(35,50,67,0.015) 1px, transparent 1px),
-        radial-gradient(rgba(35,50,67,0.015) 1px, transparent 1px);
-      background-size: 40px 40px, 80px 80px;
-      opacity:0.6;
-      mix-blend-mode: overlay;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(180,200,255,0.22), transparent 60%),
+        radial-gradient(circle at 80% 80%, rgba(255,209,209,0.18), transparent 60%);
+      opacity:0.55;
+      mix-blend-mode:soft-light;
     }
 
-    main{max-width:1100px;margin:36px auto;padding:18px;color:#233243}
+    h1, h3 { font-weight:700; }
 
-    /* HERO */
-    header{position:relative;height:56vh;min-height:360px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:14px;box-shadow:0 12px 30px rgba(30,50,80,0.06);margin:12px}
-    header .cover-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:14px;transition:filter .3s ease}
-    /* softer dark overlay for hero text readability */
-    header::after{content:"";position:absolute;inset:0;border-radius:14px;background:linear-gradient(180deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.55) 55%);}
-    .hero-inner{position:relative;z-index:2;text-align:center;padding:2rem 1rem;max-width:980px}
-
-    .subtitle{color:#5a6b73;margin-bottom:8px;font-size:.95rem;font-weight:600}
-    h1{font-size:2.1rem;color:#142229;margin-bottom:8px;letter-spacing:-0.01em;font-weight:700}
-    p.lead{color:#3b4f56;max-width:920px;margin:0 auto;font-size:1rem}
-
-    /* CTA - pastel buttons */
-    .buttons{margin-top:18px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-    .btn{
-      display:inline-block;padding:.78rem 1.4rem;border-radius:999px;background:linear-gradient(90deg,#bfeaf7,#cde8f2);
-      color:#073b45;font-weight:700;text-decoration:none;box-shadow:0 8px 20px rgba(8,62,74,0.06);transition:transform .14s,box-shadow .14s,opacity .14s;position:relative;border:1px solid rgba(7,59,69,0.06)
+    main {
+      max-width:1100px;
+      margin:0 auto;
+      padding:0 22px;
     }
-    .btn.secondary{
-      background:linear-gradient(90deg,#ffd6e0,#fff1d6);
-      color:#3b2f2f;border:1px solid rgba(61,45,45,0.06)
+
+    /* ---------- HERO ---------- */
+    header {
+      position:relative;
+      height:62vh;
+      min-height:360px;
+      margin:20px;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 24px 60px rgba(0,0,0,0.10);
     }
-    .btn:hover{transform:translateY(-3px);box-shadow:0 18px 40px rgba(8,62,74,0.08);opacity:0.98}
 
-    /* Sections */
-    section{padding:28px 0;border-top:1px solid rgba(34,50,67,0.06)}
-    section:first-of-type{border-top:0;padding-top:18px}
-    section h3{
-      color:#145b66;font-size:1.14rem;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:.6rem;font-weight:700
+    .cover-img {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      filter:brightness(0.66) saturate(1.1);
+      transition:filter .3s ease;
     }
-    section h3 svg{width:20px;height:20px;fill:#145b66}
 
-    .muted{color:#4b6b71}
-    .lead-compact{max-width:900px;margin:0 auto;color:#446268;text-align:center}
-
-    /* preview */
-    .preview{margin:20px auto 6px;text-align:center}
-    .preview img{width:96%;max-width:880px;border-radius:10px;border:1px solid rgba(20,86,102,0.04);box-shadow:0 8px 26px rgba(27,51,58,0.06);display:block;margin:0 auto}
-    .preview .no-preview{padding:18px;border-radius:10px;background:linear-gradient(180deg,#fff 0%, #fafafa 100%);border:1px dashed rgba(20,86,102,0.06);color:#2f4f55}
-
-    /* cards & rows */
-    .row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-    .card{background:linear-gradient(180deg,#ffffff,#fbfdfe);padding:16px 18px;border-radius:12px;min-width:220px;max-width:360px;border:1px solid rgba(20,86,102,0.04)}
-    .card strong{display:block;font-size:1.05rem;color:#13343a}
-    .card .muted{display:block;margin-top:6px}
-
-    /* tech badges - soft */
-    .tech-stack{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
-    .tech{padding:.5rem .9rem;border-radius:999px;background:linear-gradient(90deg,#f1f9fb,#eef6f7);border:1px solid rgba(20,86,102,0.04);font-weight:700;color:#164a52}
-
-    /* deliverables list alignment */
-    .deliverables-block{max-width:760px;margin:0 auto;text-align:left}
-    .deliverables-list{margin-top:12px;padding-left:20px;color:#133d40}
-    .download-links{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:flex-start;margin-top:12px}
-    .download-links a{color:#0f6670;text-decoration:none;font-weight:700;background:linear-gradient(90deg,#d7f6fb,#eaf8f9);padding:8px 10px;border-radius:8px;border:1px solid rgba(15,102,112,0.06)}
-
-    /* checklist */
-    .checklist{max-width:760px;margin:12px auto 0;color:#1e5156}
-    .checklist li{margin:8px 0;padding-left:18px;position:relative}
-    .checklist li:before{content:"✓";position:absolute;left:0;color:#8fd3c7}
-
-    /* responsive */
-    @media (max-width:920px){
-      header{height:50vh}
-      .card{min-width:180px}
-      .preview img{max-width:720px}
+    header::after {
+      content:"";
+      position:absolute; inset:0;
+      background:linear-gradient(
+        180deg,
+        rgba(255,255,255,0.15) 0%,
+        rgba(255,255,255,0.75) 70%
+      );
     }
-    @media (max-width:640px){
-      h1{font-size:1.6rem}
-      header{height:46vh}
-      .download-links{justify-content:center}
+
+    .hero-inner {
+      position:relative; z-index:3;
+      text-align:center;
+      padding:2.2rem 1rem;
+      max-width:900px;
+      margin:0 auto;
+    }
+
+    .subtitle {
+      color:#526777;
+      font-weight:600;
+      margin-bottom:10px;
+      font-size:0.95rem;
+    }
+
+    h1 {
+      font-size:2rem;
+      color:#0d1c26;
+      margin-bottom:12px;
+      letter-spacing:-0.5px;
+    }
+
+    .lead {
+      color:#38525f;
+      max-width:780px;
+      margin:0 auto;
+      font-size:1rem;
+      line-height:1.45;
+    }
+
+    /* ---------- BUTTONS ---------- */
+    .buttons {
+      margin-top:22px;
+      display:flex;
+      gap:14px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+
+    .btn {
+      display:inline-block;
+      padding:0.75rem 1.4rem;
+      border-radius:12px;
+      font-weight:600;
+      text-decoration:none;
+      transition:all .18s ease;
+      font-size:0.95rem;
+    }
+
+    .btn-primary {
+      background:linear-gradient(90deg,#76cffb,#4daef9);
+      color:#07304b;
+      box-shadow:0 10px 28px rgba(103,189,255,0.28);
+    }
+    .btn-primary:hover { transform:translateY(-3px); }
+
+    .btn-secondary {
+      background:linear-gradient(90deg,#ffe0f1,#ffeede);
+      color:#4b2f33;
+      border:1px solid rgba(0,0,0,0.05);
+      box-shadow:0 8px 20px rgba(214,158,158,0.12);
+    }
+    .btn-secondary:hover { transform:translateY(-3px); }
+
+    /* ---------- SECTION ---------- */
+    section {
+      padding:46px 0;
+      border-top:1px solid rgba(0,0,0,0.06);
+      text-align:center;
+    }
+
+    h3 {
+      color:#1e5661;
+      display:flex; 
+      justify-content:center;
+      align-items:center;
+      gap:0.5rem;
+      margin-bottom:14px;
+      font-size:1.25rem;
+    }
+
+    .muted { color:#47626a; font-size:0.95rem; }
+
+    .lead-compact {
+      max-width:850px;
+      margin:0 auto;
+      font-size:1rem;
+      color:#3a5058;
+    }
+
+    /* ---------- PREVIEW ---------- */
+    .preview {
+      margin:30px auto 12px;
+      text-align:center;
+    }
+
+    .preview img {
+      max-width:900px;
+      width:95%;
+      border-radius:14px;
+      box-shadow:0 16px 45px rgba(0,0,0,0.14);
+      border:1px solid rgba(0,0,0,0.05);
+    }
+
+    .preview .fallback {
+      padding:20px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.6);
+      border:1px dashed rgba(0,0,0,0.15);
+      color:#3e5a62;
+      font-weight:500;
+      max-width:420px;
+      margin:0 auto;
+    }
+
+    /* ---------- CARDS ---------- */
+    .row {
+      display:flex;
+      gap:18px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:20px;
+    }
+
+    .card {
+      background:rgba(255,255,255,0.55);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(0,0,0,0.06);
+      padding:20px;
+      border-radius:14px;
+      min-width:240px;
+      max-width:340px;
+      box-shadow:0 12px 32px rgba(0,0,0,0.08);
+      text-align:center;
+    }
+
+    .card strong {
+      display:block;
+      font-size:1.1rem;
+      margin-bottom:6px;
+      color:#153946;
+    }
+
+    /* ---------- METHODS LIST ---------- */
+    .checklist {
+      max-width:780px;
+      margin:20px auto 0;
+      text-align:left;
+      padding-left:14px;
+    }
+
+    .checklist li {
+      margin:8px 0;
+      padding-left:18px;
+      position:relative;
+      color:#1e4750;
+    }
+    .checklist li::before {
+      content:"✓";
+      position:absolute;
+      left:0;
+      top:1px;
+      font-weight:700;
+      color:#2ab5ad;
+    }
+
+    /* ---------- DOWNLOAD LINKS ---------- */
+    .download-links {
+      margin-top:12px;
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    .download-links a {
+      background:#ebf8ff;
+      padding:9px 14px;
+      border-radius:10px;
+      font-weight:600;
+      text-decoration:none;
+      color:#064a63;
+      border:1px solid rgba(0,0,0,0.05);
+      transition:0.15s;
+    }
+    .download-links a:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    footer {
+      margin:40px 0 30px;
+      text-align:center;
+      color:#4b6772;
+      font-size:0.9rem;
     }
   </style>
 </head>
+
 <body>
-  <main>
-    <!-- HERO -->
-    <header>
-      <!-- cover handling: tries the canonical file name, then a few fallbacks.
-           Keep your cover file in the repo with one of these names (recommended:
-           cover_studentrecords.png). -->
-      <img class="cover-img" id="coverImg" alt="StudentRecords project cover">
-      <div class="hero-inner" role="banner" aria-labelledby="projectTitle">
-        <div class="subtitle">🛠️ AWS Cloud • DynamoDB • S3 • Python</div>
-        <h1 id="projectTitle">StudentRecords CRUD (Create, Read, Update, Delete)</h1>
-        <p class="lead">A cloud-native student-management demo: JSON ingestion, Create/Read/Update/Delete, advanced queries, gender counts and S3 export. Includes code, screenshots and a submission-ready APA document.</p>
 
-        <div class="buttons" role="group" aria-label="Primary actions">
-          <a class="btn" href="https://github.com/ishupandi15/StudentDynamoDBProject/tree/main" target="_blank" rel="noopener">🔗 View GitHub</a>
-          <a class="btn secondary" href="StudentDynamoDBProject.docx" download>📄 Download APA doc</a>
+<main>
+
+  <!-- ---------- HERO ---------- -->
+  <header>
+    <img class="cover-img" id="coverImg" alt="StudentRecords cover">
+
+    <div class="hero-inner">
+      <div class="subtitle">AWS Cloud • DynamoDB • S3 • Python</div>
+
+      <h1>StudentRecords CRUD (Create, Read, Update, Delete)</h1>
+
+      <p class="lead">
+        A premium portfolio-style cloud project demonstrating a student data
+        management system using AWS Cloud9, DynamoDB, and S3.
+      </p>
+
+      <div class="buttons">
+        <a class="btn btn-primary" href="https://github.com/ishupandi15/StudentDynamoDBProject/tree/main" target="_blank">🔗 View GitHub</a>
+        <a class="btn btn-secondary" href="StudentDynamoDBProject.docx" download>📄 Download APA doc</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ---------- OVERVIEW ---------- -->
+  <section id="overview" class="reveal">
+    <h3>Project Overview</h3>
+    <p class="lead-compact">
+      This cloud-native Student Records CRUD system demonstrates data ingestion,
+      processing, and analytics in AWS. Includes DynamoDB table creation,
+      JSON ingestion, CRUD operations, Grade ‘A’ querying, gender analysis,
+      and exporting data to S3.
+    </p>
+
+    <div class="preview">
+      <img id="previewImg" alt="Project UI preview" style="display:none;">
+      <div id="noPreview" class="fallback" style="display:none;">
+        Preview not available — download dataset:
+        <div style="margin-top:10px">
+          <a href="students.json" download>📥 Download students.json</a>
         </div>
       </div>
-    </header>
+    </div>
+  </section>
 
-    <!-- Overview -->
-    <section id="overview" class="reveal">
-      <h3>Project Overview</h3>
-      <p class="lead-compact muted">This project implements a Student Records CRUD system in AWS. It shows how to design a DynamoDB schema, ingest a JSON dataset, implement CRUD scripts with Python (boto3), query Grade 'A' students, count genders, and export a JSON snapshot to S3 for reporting.</p>
+  <!-- ---------- TOOLS ---------- -->
+  <section id="tools" class="reveal">
+    <h3>Technologies & Tools Used</h3>
 
-      <div class="preview" aria-live="polite">
-        <!-- screenshot preview (optional). If not present the "no-preview" block displays and JSON download link is provided -->
-        <img src="preview_student_ui.png" alt="Student Records UI preview" id="previewImg" style="display:none;">
-        <div id="noPreview" class="no-preview" style="display:none">
-          <strong>Preview unavailable</strong>
-          <div style="margin-top:8px;color:#166b6f">Download the dataset to inspect locally:</div>
-          <div style="margin-top:10px">
-            <a class="download-links" href="students.json" download>📥 Download students.json</a>
-          </div>
-        </div>
-      </div>
-    </section>
+    <div class="row">
+      <div class="card"><strong>AWS Cloud9</strong><span class="muted">Cloud IDE</span></div>
+      <div class="card"><strong>AWS DynamoDB</strong><span class="muted">NoSQL Database</span></div>
+      <div class="card"><strong>AWS S3</strong><span class="muted">Object Storage</span></div>
+      <div class="card"><strong>Python (boto3)</strong><span class="muted">Cloud Automation</span></div>
+    </div>
 
-    <!-- Tools -->
-    <section id="tools" class="reveal">
-      <h3>Technologies & Tools Used</h3>
-      <div class="tech-stack" aria-hidden="false">
-        <span class="tech">AWS Cloud9</span>
-        <span class="tech">AWS DynamoDB</span>
-        <span class="tech">AWS S3</span>
-        <span class="tech">Python 3 (boto3)</span>
-        <span class="tech">JSON / JSQL</span>
-        <span class="tech">Git & GitHub</span>
-      </div>
+    <ul class="checklist">
+      <li>Create DynamoDB table (StudentRecords)</li>
+      <li>Insert from students.json</li>
+      <li>Run CRUD operations via Python scripts</li>
+      <li>Query Grade ‘A’ students</li>
+      <li>Perform gender analytics</li>
+      <li>Export results to S3</li>
+    </ul>
+  </section>
 
-      <ul class="checklist" aria-label="Key project operations">
-        <li>Create DynamoDB table (StudentRecords) with partition key student_id</li>
-        <li>Insert data from students.json into the table</li>
-        <li>Implement viewAll, updateStudent, deleteStudent scripts</li>
-        <li>Query students with grade 'A' and count gender distribution</li>
-        <li>Export all records to S3 as JSON</li>
-      </ul>
-    </section>
+  <!-- ---------- WORKFLOW ---------- -->
+  <section id="workflow" class="reveal">
+    <h3>Implementation Workflow</h3>
+    <div class="row">
+      <div class="card"><strong>Part A</strong><span class="muted">createTable.py</span></div>
+      <div class="card"><strong>Part B</strong><span class="muted">insertFromFile.py</span></div>
+      <div class="card"><strong>Part C</strong><span class="muted">CRUD Scripts</span></div>
+      <div class="card"><strong>Part D</strong><span class="muted">queryStudents.py + uploadToS3.py</span></div>
+    </div>
+  </section>
 
-    <!-- Implementation Workflow -->
-    <section id="workflow" class="reveal">
-      <h3>Implementation Workflow</h3>
-      <div class="row" role="list">
-        <div class="card" role="listitem">
-          <strong>Part A — Table Setup</strong>
-          <span class="muted">createTable.py — defines StudentRecords (student_id partition key)</span>
-        </div>
-        <div class="card" role="listitem">
-          <strong>Part B — Data Ingestion</strong>
-          <span class="muted">insertFromFile.py — loads students.json into DynamoDB</span>
-        </div>
-      </div>
+  <!-- ---------- DELIVERABLES ---------- -->
+  <section id="deliverables" class="reveal">
+    <h3>Final Deliverables</h3>
 
-      <div class="row" style="margin-top:12px" role="list">
-        <div class="card" role="listitem">
-          <strong>Part C — CRUD Operations</strong>
-          <span class="muted">viewAllStudents.py, updateStudent.py, deleteStudent.py</span>
-        </div>
-        <div class="card" role="listitem">
-          <strong>Part D — Queries & Export</strong>
-          <span class="muted">queryStudents.py + uploadToS3.py (Grade A + gender count + S3 export)</span>
-        </div>
-      </div>
-    </section>
+    <ol class="deliverables-list">
+      <li>Folder structure with Python scripts</li>
+      <li>Screenshot of students.json in DynamoDB</li>
+      <li>CRUD operation scripts</li>
+      <li>Query + gender count script</li>
+      <li>S3 upload export screenshot</li>
+      <li>DynamoDB + S3 screenshots</li>
+      <li>Clean code + README.md</li>
+    </ol>
 
-    <!-- Deliverables -->
-    <section id="deliverables" class="reveal">
-      <h3>Final Deliverables</h3>
-      <div class="deliverables-block">
-        <p class="muted">Submit a single Word document (APA) containing:</p>
-        <ol class="deliverables-list">
-          <li>Folder structure with all Python files</li>
-          <li>Screenshot of <code>students.json</code> uploaded to DynamoDB</li>
-          <li>Code text files for CRUD operations (working scripts)</li>
-          <li>Code text file for query results (Grade A + gender count)</li>
-          <li>Screenshot of JSON data exported to S3</li>
-          <li>Screenshots: Table in DynamoDB + S3 Upload</li>
-          <li>Commented & organized code, and README.md</li>
-        </ol>
+    <div class="download-links">
+      <a href="StudentDynamoDBProject.docx" download>📄 Download APA Document</a>
+      <a href="students.json" download>📥 Download students.json</a>
+    </div>
+  </section>
 
-        <div style="margin-top:12px">
-          <a class="download-links" href="StudentDynamoDBProject.docx" download>📄 Download APA doc (Word)</a>
-          <a class="download-links" href="students.json" download>📥 Download students.json</a>
-        </div>
-      </div>
-    </section>
+  <!-- ---------- QUICK LINKS ---------- -->
+  <section id="quick" class="reveal">
+    <h3>Quick Links & Repo</h3>
+    <div class="row">
+      <div class="card"><strong>Repository</strong><span class="muted"><a href="https://github.com/ishupandi15/StudentDynamoDBProject/tree/main" target="_blank" style="text-decoration:none;color:#0d5967;">GitHub Project</a></span></div>
+      <div class="card"><strong>Creator</strong><span class="muted">Ishwariya Pandi</span></div>
+      <div class="card"><strong>Contact</strong><span class="muted">ipandi1@asu.edu</span></div>
+    </div>
+  </section>
 
-    <!-- Quick Links -->
-    <section id="quick" class="reveal">
-      <h3>Quick Links & Repo</h3>
-      <div class="row" style="margin-top:12px">
-        <div class="card"><strong>Repository</strong><span class="muted"><a href="https://github.com/ishupandi15/StudentDynamoDBProject/tree/main" target="_blank" style="color:#0f6670;text-decoration:none">ishupandi15/StudentDynamoDBProject</a></span></div>
-        <div class="card"><strong>Team</strong><span class="muted">Ishwariya Pandi (solo)</span></div>
-        <div class="card"><strong>Contact</strong><span class="muted">ipandi1@asu.edu</span></div>
-      </div>
-    </section>
+  <footer>
+    StudentRecords CRUD Project • Arizona State University • AWS Cloud9 · DynamoDB · S3 · Python
+  </footer>
 
-    <footer style="margin-top:18px;padding-bottom:36px;color:#2f4f56;text-align:center">
-      StudentRecords Project — Arizona State University • Submit a single Word (APA) file • Dataset: students.json
-    </footer>
-  </main>
+</main>
 
-  <!-- improved image & preview handling script -->
-  <script>
-    (function(){
-      // list of candidate cover filenames in preferred order
-      const coverCandidates = [
-        'cover_studentrecords.png',
-        'cover_studentrecords_desktop.png',
-        'A_digital_infographic_on_a_dark_blue_background_pr.png',
-        'A_2D_digital_graphic_design_showcases_a_StudentRec.png',
-        'cover_studentrecords.jpg'
-      ];
+<script>
+  /* cover image loader */
+  (function(){
+    const cover = document.getElementById('coverImg');
+    const options = [
+      "cover_studentrecords.png",
+      "A_digital_infographic_on_a_dark_blue_background_pr.png",
+      "A_2D_digital_graphic_design_showcases_a_StudentRec.png"
+    ];
+    let i=0;
+    function loadNext(){
+      if(i>=options.length) return;
+      cover.src = options[i++];
+      cover.onerror = loadNext;
+    }
+    loadNext();
 
-      const coverImg = document.getElementById('coverImg');
-      function tryLoad(list){
-        if(!list.length){ coverImg.style.display='none'; return; }
-        const next = list.shift();
-        coverImg.src = next;
-        coverImg.onload = function(){ coverImg.style.filter='none'; };
-        coverImg.onerror = function(){ tryLoad(list); };
-      }
-      tryLoad(coverCandidates.slice());
+    /* Preview handler */
+    const preview = document.getElementById('previewImg');
+    const fallback = document.getElementById('noPreview');
+    preview.src = "preview_student_ui.png";
+    preview.onload = ()=>{ preview.style.display="block"; };
+    preview.onerror = ()=>{ fallback.style.display="block"; };
+  })();
+</script>
 
-      // preview screenshot handling
-      const preview = document.getElementById('previewImg');
-      const noPreview = document.getElementById('noPreview');
-      const previewCandidate = 'preview_student_ui.png';
-      // attempt to load preview; if it fails, show fallback block
-      preview.src = previewCandidate;
-      preview.onload = function(){ preview.style.display='block'; noPreview.style.display='none'; }
-      preview.onerror = function(){ preview.style.display='none'; noPreview.style.display='block'; };
-
-      // reveal animation (very lightweight)
-      const observer = new IntersectionObserver(entries=>{
-        entries.forEach(e=>{
-          if(e.isIntersecting){ e.target.classList.add('reveal-visible'); e.target.classList.add('visible'); observer.unobserve(e.target); }
-        });
-      }, {threshold:0.12});
-      document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
-    })();
-  </script>
 </body>
 </html>
