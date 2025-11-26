@@ -114,6 +114,12 @@ Using `queryStudents.py`:
 
 ---
 
+## 🗂 Folder Structure
+
+<img width="251" height="296" alt="image" src="https://github.com/user-attachments/assets/5a72dc21-9abc-47fb-b7b4-430d9b61b620" />
+
+---
+
 ## 🧭 Logical Overview
 - **DynamoDB** stores all student records.  
 - **Python boto3** performs all CRUD and export tasks.  
@@ -167,20 +173,3 @@ This project is released under the **MIT License**.
 🌐 **GitHub Profile:** https://github.com/ishupandi15
 
 ---
-
-
-## 🗂 Folder Structure
-
-<img width="251" height="296" alt="image" src="https://github.com/user-attachments/assets/5a72dc21-9abc-47fb-b7b4-430d9b61b620" />
-
-
-# 🎉 All done!  
-
-If you want:
-
-⭐ A YAML version of this README  
-⭐ A PDF version  
-⭐ A GitHub Pages website using this  
-⭐ A matching resume-style project summary  
-
-Just tell me!
