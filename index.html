@@ -18,48 +18,40 @@
       -moz-osx-font-smoothing:grayscale;
       overflow-x:hidden;
     }
-
     main{max-width:980px;margin:0 auto;padding:0 20px;color:#233243}
 
-    /* HERO: full viewport */
+    /* HERO: full viewport cover */
     header{
       position:relative;
-      height:100vh;            /* Fills entire viewport */
+      height:100vh;
       min-height:480px;
       display:flex;
       align-items:center;
       justify-content:center;
       overflow:hidden;
     }
-
-    /* cover image fills, crops nicely on mobile/desktop */
+    /* cover image fills the entire header area */
     header img.cover {
       position:absolute;
       top:0; left:0; width:100%; height:100%;
-      object-fit:cover;         /* critical: makes it full-bleed and responsive */
+      object-fit:cover;
       object-position:center;
-      -webkit-transform:translateZ(0);
-      transform:translateZ(0);
       filter:brightness(0.65) saturate(1.05);
       transition:filter .25s ease, transform .35s ease;
+      -webkit-transform:translateZ(0);
+      transform:translateZ(0);
     }
-
-    /* overlay to keep text readable across bright/dark parts of image */
+    /* overlay for readability */
     header::before{
       content:"";
       position:absolute; inset:0;
       background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.62) 55%, rgba(255,255,255,0.95) 100%);
       pointer-events:none;
     }
-
     .hero-inner{
       position:relative; z-index:3;
-      text-align:center;
-      padding:2.4rem 1rem;
-      max-width:1100px;
-      margin:0 18px;
+      text-align:center; padding:2.4rem 1rem; max-width:1100px; margin:0 18px;
     }
-
     .subtitle{color:#5a6b73;margin-bottom:8px;font-size:.95rem;font-weight:600}
     h1{font-size:2.4rem;color:#06252b;margin-bottom:10px;letter-spacing:-0.5px;font-weight:700}
     p.lead{color:#27484b;max-width:920px;margin:0 auto;font-size:1rem}
@@ -69,7 +61,7 @@
     .btn.secondary{background:linear-gradient(90deg,#ffd6e0,#fff1d6);color:#3b2f2f}
     .btn:hover{transform:translateY(-4px);box-shadow:0 20px 54px rgba(8,62,74,0.12)}
 
-    /* Sections */
+    /* sections */
     section{padding:34px 0;border-top:1px solid rgba(34,50,67,0.06);text-align:center}
     section:first-of-type{border-top:0;padding-top:18px}
     section h3{color:#145b66;font-size:1.18rem;margin-bottom:12px;font-weight:700}
@@ -97,9 +89,9 @@
     .download-links{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:12px}
     .download-links a{color:#0f6670;text-decoration:none;font-weight:700;background:linear-gradient(90deg,#d7f6fb,#eaf8f9);padding:8px 10px;border-radius:8px;border:1px solid rgba(15,102,112,0.06)}
 
-    footer{padding:22px 12px;color:#2f4f56;text-align:center;border-top:1px solid rgba(255,255,255,0.02);margin-top:28px}
+    footer{padding:22px 12px;color:#2f4f56;text-align:center;margin-top:28px}
 
-    /* Responsive */
+    /* responsive */
     @media (max-width:1100px){
       h1{font-size:2.05rem}
       header{min-height:520px}
@@ -122,13 +114,15 @@
 <body>
   <!-- HERO -->
   <header>
-    <!-- try primary filename; fallback handled by onerror -->
+    <!-- primary file (cover_studentrecords.png) with fallback if missing -->
     <img class="cover" src="cover_studentrecords.png" alt="StudentRecords Project Cover"
          onerror="(function(el){el.onerror=null;el.src='A_digital_infographic_on_a_dark_blue_background_pr.png'})(this)">
+
     <div class="hero-inner" role="banner">
       <div class="subtitle">🛠️ AWS Cloud • NoSQL • Python • Cloud9</div>
       <h1>StudentRecords CRUD (Create, Read, Update, Delete) application</h1>
       <p class="lead">Build a cloud-native student management app using AWS Cloud9, DynamoDB, and S3. Perform JSON ingestion, CRUD operations, targeted queries (Grade A), gender counts, and export data for reporting.</p>
+
       <div class="buttons">
         <a class="btn" href="https://github.com/ishupandi15/StudentDynamoDBProject/tree/main" target="_blank" rel="noopener">🔗 View GitHub</a>
         <a class="btn secondary" href="StudentDynamoDBProject.docx" download>📄 Download APA doc</a>
@@ -141,6 +135,7 @@
     <section id="overview" class="reveal">
       <h3>Project Overview</h3>
       <p class="lead-compact muted">This project implements a Student Records CRUD system — a hands-on exercise in designing cloud workflows with DynamoDB and S3. It demonstrates data ingestion from a JSON file, Create/Read/Update/Delete operations, targeted queries (students with grade 'A'), gender counts, and a final JSON export for backup or downstream analytics.</p>
+
       <div class="preview">
         <img src="preview_student_ui.png" alt="Student Records UI preview" onerror="this.style.display='none'">
         <div style="margin-top:8px;text-align:center" class="small muted">No preview available? <a href="students.json" download style="color:#0f6670">Download students.json</a> to try locally or import into the demo.</div>
@@ -158,6 +153,7 @@
         <span class="tech">JSON / JSQL</span>
         <span class="tech">Git & GitHub</span>
       </div>
+
       <ul class="checklist" aria-label="Key project operations">
         <li>Create DynamoDB table (StudentRecords) with partition key student_id</li>
         <li>Insert data from students.json into the table</li>
@@ -167,7 +163,7 @@
       </ul>
     </section>
 
-    <!-- Implementation Workflow -->
+    <!-- Workflow -->
     <section id="workflow" class="reveal">
       <h3>Implementation Workflow</h3>
       <div class="row">
@@ -229,10 +225,9 @@
     StudentRecords Project — Arizona State University • Submit a single Word (APA) file • Dataset: students.json
   </footer>
 
-  <!-- lightweight reveal & accessibility -->
+  <!-- small reveal script -->
   <script>
     (function(){
-      // Intersection observer to add lightweight reveal class
       const obs = new IntersectionObserver(entries=>{
         entries.forEach(e=>{
           if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
