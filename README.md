@@ -41,11 +41,9 @@ This project mirrors enterprise-level NoSQL workflows using AWS.
 
 ---
 
-## 🧩 Project Structure (Diagram)
+## 🗂 Folder Structure
 
-> *(You can replace this with your own diagram image)*
-
-<img width="450" src="https://github.com/user-attachments/assets/6ee581c0-1e57-4f6e-9911-922c3159c89c">
+<img width="251" height="296" alt="image" src="https://github.com/user-attachments/assets/5a72dc21-9abc-47fb-b7b4-430d9b61b620" />
 
 ---
 
@@ -111,12 +109,6 @@ Using `queryStudents.py`:
 - LocalStorage persistence  
 
 💡 **Pure HTML/JS — runs locally, no AWS required.**
-
----
-
-## 🗂 Folder Structure
-
-<img width="251" height="296" alt="image" src="https://github.com/user-attachments/assets/5a72dc21-9abc-47fb-b7b4-430d9b61b620" />
 
 ---
 
