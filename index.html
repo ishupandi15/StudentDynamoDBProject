@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>StudentRecords CRUD (Create, Read, Update, Delete) application</title>
+  <meta name="description" content="Interactive StudentRecords CRUD demo using localStorage. Import JSON, run CRUD, export JSON/CSV.">
+  <style>
+    :root{
+      --bg:#071026; --panel:#0b1220; --muted:#9aa6b3; --accent:#ff9900; --accent2:#4f46e5;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color-scheme: dark;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg) 0%, #031026 100%);color:#e6eef8}
+    .center{max-width:1200px;margin:0 auto;padding:18px}
+    /* cover */
+    .cover{margin:18px 0 6px}
+    .cover picture img{width:100%;height:auto;display:block;border-radius:12px;box-shadow:0 12px 40px rgba(2,6,23,0.6)}
+    .cover-meta{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;color:var(--muted);font-size:14px}
+    .cover-meta a{color:var(--muted);text-decoration:none}
+    /* toolbar */
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:14px;border-radius:12px;margin-bottom:14px}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    button{background:var(--glass);border:1px solid rgba(255,255,255,0.04);color:inherit;padding:8px 12px;border-radius:8px;cursor:pointer}
+    button.primary{background:linear-gradient(90deg,var(--accent2),#6d28d9);border:none}
+    input, select{padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit}
+    .small{font-size:13px;color:var(--muted)}
+    /* stats */
+    .stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .stat{background:rgba(255,255,255,0.02);padding:8px 12px;border-radius:999px;color:var(--muted);font-weight:600}
+    /* table */
+    .table-wrap{overflow:auto;border-radius:8px;background:transparent}
+    table{width:100%;border-collapse:collapse;min-width:700px}
+    th,td{padding:10px 12px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.03);font-size:14px}
+    th{color:var(--muted);cursor:pointer;user-select:none}
+    tr:hover td{background:rgba(255,255,255,0.01)}
+    .actions button{margin-right:6px}
+    .nowrap{white-space:nowrap}
+    /* pagination */
+    .pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
+    .page-btn{padding:6px 10px;border-radius:6px;background:transparent;border:1px solid rgba(255,255,255,0.03);cursor:pointer}
+    /* modal */
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,0.6);z-index:60;padding:20px}
+    .modal.open{display:flex}
+    .panel{background:#07122b;padding:18px;border-radius:12px;min-width:300px;max-width:720px}
+    label{display:block;color:var(--muted);margin:8px 0 6px;font-size:13px}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .muted{color:var(--muted)}
+    .badge-check{display:inline-flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02)}
+    @media(max-width:880px){
+      .center{padding:14px}
+      table{min-width:unset}
+      .cover-meta{flex-direction:column;align-items:flex-start;gap:6px}
+      .pager{justify-content:center}
+    }
+  </style>
+</head>
+<body>
+  <div class="center" role="main" aria-labelledby="mainTitle">
+
+    <!-- RESPONSIVE COVER (tries a few likely filenames) -->
+    <section class="cover" aria-label="Project cover image">
+      <picture>
+        <source media="(max-width:800px)" srcset="cover_studentrecords_mobile.png, cover_studentrecords.png">
+        <source media="(max-width:1400px)" srcset="cover_studentrecords_desktop_sm.png, cover_studentrecords.png">
+        <!-- fallback / common uploaded names included -->
+        <img src="cover_studentrecords.png"
+             alt="StudentRecords CRUD cover image"
+             onerror="this.onerror=null; this.src='A_2D_digital_graphic_design_showcases_a_StudentRec.png';">
+      </picture>
+
+      <div class="cover-meta small">
+        <div><strong style="color:#fff">StudentRecords CRUD (Create, Read, Update, Delete) application</strong>
+          <div class="muted">Cloud-native demo — AWS Cloud9 · DynamoDB · S3 · Python (boto3) · JSON</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <a href="YourNameStudentDynamoDBProject.pdf" target="_blank" rel="noreferrer">Download APA doc</a>
+          <a href="cover_studentrecords.png" download>Download cover</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TOOLBAR -->
+    <section class="card" aria-labelledby="controlsHeading">
+      <div class="toolbar" role="toolbar" aria-label="Controls">
+        <button id="addBtn" class="primary" title="Add new student">+ Add Student</button>
+        <button id="importBtn" title="Import students.json">Import JSON</button>
+        <button id="exportJsonBtn" title="Export current dataset as JSON">Export JSON</button>
+        <button id="exportCsvBtn" title="Export current dataset as CSV">Export CSV</button>
+
+        <label class="small" style="margin-left:8px">Page size:
+          <select id="pageSize">
+            <option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option>
+          </select>
+        </label>
+
+        <div style="flex:1"></div>
+
+        <input id="search" placeholder="Search by name / id / grade" aria-label="Search">
+        <select id="gradeFilter" aria-label="Filter by grade">
+          <option value="">All grades</option>
+          <option value="A">Grade starts with 'A'</option>
+        </select>
+
+        <label class="badge-check small" title="Bulk delete selected">
+          <input type="checkbox" id="selectAll" style="transform:scale(1.1)"> Select all
+        </label>
+        <button id="bulkDelete" title="Delete selected rows">Delete selected</button>
+
+        <!-- hidden file input -->
+        <input id="fileInput" type="file" accept=".json" style="display:none" aria-hidden="true">
+      </div>
+
+      <div class="stats" aria-hidden="false" style="margin-top:12px">
+        <div class="stat">Total: <span id="totalCount" style="margin-left:8px;font-weight:700">0</span></div>
+        <div class="stat">Male: <span id="maleCount" style="margin-left:8px;font-weight:700">0</span></div>
+        <div class="stat">Female: <span id="femaleCount" style="margin-left:8px;font-weight:700">0</span></div>
+        <div class="stat">Grade A-ish: <span id="gradeCount" style="margin-left:8px;font-weight:700">0</span></div>
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="card table-wrap" aria-labelledby="tableHeading">
+      <table role="table" aria-label="Student records table">
+        <thead>
+          <tr>
+            <th data-key="select" style="width:40px">✓</th>
+            <th data-key="student_id">ID ▲</th>
+            <th data-key="student_name">Name</th>
+            <th data-key="gender">Gender</th>
+            <th data-key="grade">Grade</th>
+            <th data-key="transport">Transport</th>
+            <th data-key="actions" class="nowrap">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tbody" role="rowgroup"></tbody>
+      </table>
+
+      <div class="pager" role="navigation" aria-label="Pagination controls">
+        <div class="small muted" id="pageInfo">Page 1</div>
+        <button class="page-btn" id="prevPage">Prev</button>
+        <button class="page-btn" id="nextPage">Next</button>
+      </div>
+    </section>
+
+    <footer style="margin:16px 0 48px;color:var(--muted);font-size:13px">
+      Tip: Import your class `students.json` file to populate the table. Export JSON/CSV to simulate S3 export. Save screenshots of DynamoDB & S3 for submission.
+    </footer>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="panel" role="document">
+      <h3 id="modalTitle">Add Student</h3>
+      <form id="studentForm">
+        <label for="f_id">Student ID</label>
+        <input id="f_id" name="student_id" type="number" required />
+
+        <label for="f_name">Student Name</label>
+        <input id="f_name" name="student_name" type="text" required />
+
+        <label for="f_gender">Gender</label>
+        <select id="f_gender" name="gender">
+          <option>Female</option><option>Male</option><option>Other</option>
+        </select>
+
+        <label for="f_grade">Grade</label>
+        <input id="f_grade" name="grade" type="text" placeholder="A, B+, A-, etc." />
+
+        <label for="f_transport">Transport</label>
+        <input id="f_transport" name="transport" type="text" placeholder="Bus, Private, Bike..." />
+
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+          <button type="button" id="cancelBtn">Cancel</button>
+          <button type="submit" class="primary" id="saveBtn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+/* ========= Data & State ========= */
+const STORAGE_KEY = 'studentrecords_v2';
+let STORE = [];
+let sortKey = 'student_id', sortDir = 'asc';
+let currentPage = 1, pageSize = 10;
+
+/* ====== DOM ====== */
+const tbody = document.getElementById('tbody');
+const totalCount = document.getElementById('totalCount');
+const maleCount = document.getElementById('maleCount');
+const femaleCount = document.getElementById('femaleCount');
+const gradeCount = document.getElementById('gradeCount');
+
+const searchInput = document.getElementById('search');
+const gradeFilter = document.getElementById('gradeFilter');
+const selectAllCheckbox = document.getElementById('selectAll');
+const pageSizeSelect = document.getElementById('pageSize');
+const pageInfo = document.getElementById('pageInfo');
+
+/* modal elements */
+const modal = document.getElementById('modal');
+const studentForm = document.getElementById('studentForm');
+const f_id = document.getElementById('f_id');
+const f_name = document.getElementById('f_name');
+const f_gender = document.getElementById('f_gender');
+const f_grade = document.getElementById('f_grade');
+const f_transport = document.getElementById('f_transport');
+const modalTitle = document.getElementById('modalTitle');
+
+let editModeId = null;
+
+/* ====== Helpers ====== */
+const defaultData = [
+  {"student_id":1,"student_name":"Alice","gender":"Female","grade":"A","transport":"Bus"},
+  {"student_id":2,"student_name":"Bob","gender":"Male","grade":"B","transport":"Private"},
+  {"student_id":3,"student_name":"Clara","gender":"Female","grade":"A+","transport":"Bus"},
+  {"student_id":4,"student_name":"David","gender":"Male","grade":"C","transport":"Bus"},
+  {"student_id":5,"student_name":"Eva","gender":"Female","grade":"B+","transport":"Private"},
+  {"student_id":6,"student_name":"Frank","gender":"Male","grade":"B","transport":"Bus"},
+  {"student_id":7,"student_name":"Grace","gender":"Female","grade":"A","transport":"Bus"},
+  {"student_id":8,"student_name":"Henry","gender":"Male","grade":"A-","transport":"Private"},
+  {"student_id":9,"student_name":"Isla","gender":"Female","grade":"C+","transport":"Bus"},
+  {"student_id":10,"student_name":"Jack","gender":"Male","grade":"B+","transport":"Private"}
+];
+
+function readStore(){ try{ const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : (localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData)), defaultData.slice()); } catch(e){ return defaultData.slice(); } }
+function writeStore(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(STORE)); }
+
+/* ====== Init ====== */
+function init(){
+  STORE = readStore();
+  pageSize = Number(pageSizeSelect.value);
+  attachEvents();
+  render();
+}
+function attachEvents(){
+  document.getElementById('addBtn').addEventListener('click', ()=>openModal());
+  document.getElementById('importBtn').addEventListener('click', ()=>document.getElementById('fileInput').click());
+  document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
+  document.getElementById('exportCsvBtn').addEventListener('click', exportCSV);
+  document.getElementById('fileInput').addEventListener('change', handleFileImport);
+  searchInput.addEventListener('input', ()=>{ currentPage=1; render(); });
+  gradeFilter.addEventListener('change', ()=>{ currentPage=1; render(); });
+  pageSizeSelect.addEventListener('change', ()=>{ pageSize = Number(pageSizeSelect.value); currentPage=1; render(); });
+  document.getElementById('prevPage').addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; render(); }});
+  document.getElementById('nextPage').addEventListener('click', ()=>{ const totalPages = Math.max(1, Math.ceil(filteredCount()/pageSize)); if(currentPage<totalPages){ currentPage++; render(); }});
+  document.getElementById('bulkDelete').addEventListener('click', bulkDelete);
+  selectAllCheckbox.addEventListener('change', toggleSelectAll);
+  document.querySelectorAll('th[data-key]').forEach(th=>{
+    th.addEventListener('click', ()=>{ const k = th.getAttribute('data-key'); if(k==='select'||k==='actions') return; if(sortKey===k) sortDir = sortDir==='asc'?'desc':'asc'; else { sortKey=k; sortDir='asc'; } render();});
+  });
+
+  studentForm.addEventListener('submit', (e)=>{ e.preventDefault(); saveStudent();});
+  document.getElementById('cancelBtn').addEventListener('click', ()=>closeModal());
+  // drag & drop
+  window.addEventListener('dragover', e=>e.preventDefault());
+  window.addEventListener('drop', e=>{ e.preventDefault(); if(e.dataTransfer.files && e.dataTransfer.files[0]) handleImportFile(e.dataTransfer.files[0]);});
+}
+
+function openModal(data){
+  editModeId = data ? data.student_id : null;
+  modalTitle.textContent = editModeId ? 'Edit Student' : 'Add Student';
+  f_id.value = data ? data.student_id : '';
+  f_id.disabled = !!data;
+  f_name.value = data ? data.student_name : '';
+  f_gender.value = data ? data.gender : 'Female';
+  f_grade.value = data ? data.grade : '';
+  f_transport.value = data ? data.transport : '';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  f_name.focus();
+}
+function closeModal(){
+  modal.classList.remove('open');
+  modal.setAttribute('aria-hidden','true');
+  studentForm.reset();
+  editModeId = null;
+}
+
+function saveStudent(){
+  const id = Number(f_id.value);
+  const name = f_name.value.trim();
+  if(!id || !name){ alert('ID and Name required'); return; }
+  const rec = { student_id: id, student_name: name, gender: f_gender.value, grade: f_grade.value.trim(), transport: f_transport.value.trim() };
+  if(editModeId){ STORE = STORE.map(s => s.student_id === editModeId ? rec : s); }
+  else {
+    if(STORE.some(s=>s.student_id===id)){ alert('student_id already exists'); return; }
+    STORE.push(rec);
+  }
+  writeStore();
+  closeModal();
+  render();
+}
+
+/* ====== Render & Utilities ====== */
+function filteredData(){
+  const q = searchInput.value.trim().toLowerCase();
+  const gradeOpt = gradeFilter.value;
+  return STORE.filter(s=>{
+    if(gradeOpt === 'A' && !String(s.grade).toUpperCase().startsWith('A')) return false;
+    if(q){
+      return String(s.student_name).toLowerCase().includes(q) ||
+             String(s.student_id).toLowerCase().includes(q) ||
+             String(s.grade).toLowerCase().includes(q) ||
+             String(s.transport||'').toLowerCase().includes(q);
+    }
+    return true;
+  });
+}
+function filteredCount(){ return filteredData().length; }
+
+function render(){
+  // sort
+  const data = filteredData().slice().sort((a,b)=>{
+    const va = (a[sortKey] ?? '').toString().toLowerCase();
+    const vb = (b[sortKey] ?? '').toString().toLowerCase();
+    if(sortDir==='asc') return va>vb?1:va<vb?-1:0;
+    return va>vb?-1:va<vb?1:0;
+  });
+
+  // pagination
+  const total = data.length;
+  const totalPages = Math.max(1, Math.ceil(total/pageSize));
+  if(currentPage>totalPages) currentPage = totalPages;
+  const start = (currentPage-1)*pageSize;
+  const pageItems = data.slice(start, start+pageSize);
+
+  // render rows
+  tbody.innerHTML = '';
+  pageItems.forEach(item=>{
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-select" data-id="${item.student_id}"></td>
+      <td>${escapeHtml(item.student_id)}</td>
+      <td>${escapeHtml(item.student_name)}</td>
+      <td>${escapeHtml(item.gender)}</td>
+      <td>${escapeHtml(item.grade)}</td>
+      <td>${escapeHtml(item.transport||'')}</td>
+      <td class="actions nowrap">
+        <button data-action="edit" data-id="${item.student_id}">Edit</button>
+        <button data-action="delete" data-id="${item.student_id}">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // attach row action listeners
+  tbody.querySelectorAll('button[data-action]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      const id = Number(btn.getAttribute('data-id'));
+      const action = btn.getAttribute('data-action');
+      if(action==='edit'){ const rec = STORE.find(s=>s.student_id===id); openModal(rec); }
+      else if(action==='delete'){ if(confirm('Delete student id '+id+' ?')){ STORE = STORE.filter(s=>s.student_id!==id); writeStore(); render(); } }
+    });
+  });
+
+  // row select checkbox listeners
+  tbody.querySelectorAll('.row-select').forEach(cb=>{
+    cb.addEventListener('change', ()=>{ /* no-op for now */ });
+  });
+
+  // stats
+  totalCount.textContent = STORE.length;
+  maleCount.textContent = STORE.filter(s=>String(s.gender).toLowerCase()==='male').length;
+  femaleCount.textContent = STORE.filter(s=>String(s.gender).toLowerCase()==='female').length;
+  gradeCount.textContent = STORE.filter(s=>String(s.grade).toUpperCase().startsWith('A')).length;
+
+  // page info
+  pageInfo.textContent = `Page ${currentPage} of ${totalPages} — ${total} item(s)`;
+
+  // update selectAll
+  selectAllCheckbox.checked = false;
+}
+
+/* ====== CSV / JSON export ====== */
+function exportJSON(){
+  const data = STORE;
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  triggerDownload(blob, 'students_export.json');
+}
+function exportCSV(){
+  const rows = [['student_id','student_name','gender','grade','transport']];
+  STORE.forEach(s => rows.push([s.student_id, s.student_name, s.gender, s.grade, s.transport||'']));
+  const csv = rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  triggerDownload(blob, 'students_export.csv');
+}
+function triggerDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+/* ====== Import ====== */
+function handleFileImport(ev){ if(ev && ev.target && ev.target.files && ev.target.files[0]) handleImportFile(ev.target.files[0]); }
+function handleImportFile(file){
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try{
+      const parsed = JSON.parse(e.target.result);
+      if(!Array.isArray(parsed)) throw new Error('JSON must be an array');
+      // normalize IDs
+      const norm = parsed.map(it=>({ student_id: Number(it.student_id), student_name: it.student_name||'', gender: it.gender||'', grade: it.grade||'', transport: it.transport||'' }));
+      STORE = norm;
+      writeStore();
+      currentPage = 1;
+      render();
+      alert('Imported '+norm.length+' records.');
+    }catch(err){ alert('Import failed: '+err.message); }
+  };
+  reader.readAsText(file);
+}
+
+/* ====== Bulk delete + select all ====== */
+function toggleSelectAll(e){
+  const checked = e.target.checked;
+  document.querySelectorAll('.row-select').forEach(cb=>cb.checked = checked);
+}
+function bulkDelete(){
+  const selected = Array.from(document.querySelectorAll('.row-select')).filter(cb=>cb.checked).map(cb=>Number(cb.getAttribute('data-id')));
+  if(selected.length===0){ alert('No rows selected'); return; }
+  if(!confirm('Delete '+selected.length+' selected record(s)?')) return;
+  STORE = STORE.filter(s=>!selected.includes(s.student_id));
+  writeStore();
+  currentPage = 1;
+  render();
+}
+
+/* ====== small util ====== */
+function escapeHtml(str){ if(str==null) return ''; return String(str).replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[s]); }
+
+/* ====== Start ====== */
+init();
+</script>
+</body>
+</html>
