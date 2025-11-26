@@ -1,0 +1,72 @@
+[
+  {
+    "student_id": 1,
+    "student_name": "Alice",
+    "gender": "Female",
+    "grade": "A",
+    "transport": "Bus"
+  },
+  {
+    "student_id": 2,
+    "student_name": "Bob",
+    "gender": "Male",
+    "grade": "B",
+    "transport": "Private"
+  },
+  {
+    "student_id": 3,
+    "student_name": "Clara",
+    "gender": "Female",
+    "grade": "A+",
+    "transport": "Bus"
+  },
+  {
+    "student_id": 4,
+    "student_name": "David",
+    "gender": "Male",
+    "grade": "C",
+    "transport": "Bus"
+  },
+  {
+    "student_id": 5,
+    "student_name": "Eva",
+    "gender": "Female",
+    "grade": "B+",
+    "transport": "Private"
+  },
+  {
+    "student_id": 6,
+    "student_name": "Frank",
+    "gender": "Male",
+    "grade": "B",
+    "transport": "Bus"
+  },
+  {
+    "student_id": 7,
+    "student_name": "Grace",
+    "gender": "Female",
+    "grade": "A",
+    "transport": "Bus"
+  },
+  {
+    "student_id": 8,
+    "student_name": "Henry",
+    "gender": "Male",
+    "grade": "A-",
+    "transport": "Private"
+  },
+  {
+    "student_id": 9,
+    "student_name": "Isla",
+    "gender": "Female",
+    "grade": "C+",
+    "transport": "Bus"
+  },
+  {
+    "student_id": 10,
+    "student_name": "Jack",
+    "gender": "Male",
+    "grade": "B+",
+    "transport": "Private"
+  }
+]
